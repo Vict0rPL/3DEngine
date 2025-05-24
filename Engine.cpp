@@ -1,6 +1,8 @@
-// Engine.cpp
+﻿// Engine.cpp
 #include "Engine.h"
 #include "Cube.h"
+#include "Pyramid.h"
+#include "Sphere.h"
 #include <GL/freeglut.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -96,10 +98,22 @@ void Engine::Keyboard(unsigned char key, int, int) {
         Reshape(width, height);
         break;
 
-    case '1': { // Add another cube at the camera�s look-at point
+    case '1': { // Add another cube at the camera’s look-at point
         Cube* newCube = new Cube();
         newCube->SetPosition(camTarget);
         objects.push_back(newCube);
+        break;
+    }
+    case '2': {
+        Pyramid* newPyr = new Pyramid();
+        newPyr->SetPosition(camTarget);
+        objects.push_back(newPyr);
+        break;
+    }
+    case '3': {
+        Sphere* newSphere = new Sphere();
+        newSphere->SetPosition(camTarget);
+        objects.push_back(newSphere);
         break;
     }
 
