@@ -38,7 +38,8 @@ private:
     
     // Light
     bool lightingEnabled;
-
+    // shading
+    bool shadingEnabled;
     // Projection
     ProjectionMode projMode;
     float fov, zNear, zFar;

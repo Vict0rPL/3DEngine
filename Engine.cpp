@@ -14,7 +14,7 @@ Engine::Engine(int argc, char** argv)
     : width(800), height(600), fullscreen(false), fps(60), clearColor(0.0f),
     projMode(ProjectionMode::Perspective), fov(45.0f), zNear(0.1f), zFar(100.0f),
     orthoLeft(-1.0f), orthoRight(1.0f), orthoBottom(-1.0f), orthoTop(1.0f),
-    angleY(0.0f), angleX(0.0f), camDist(5.0f), camTarget(0.0f), lastMouseX(-1), lastMouseY(-1), rotating(false)
+    angleY(0.0f), angleX(0.0f), camDist(5.0f), camTarget(0.0f), lastMouseX(-1), lastMouseY(-1), rotating(false), shadingEnabled(true)
 {
     glutInit(&argc, argv);
 }
@@ -151,6 +151,14 @@ void Engine::Keyboard(unsigned char key, int, int) {
         lightingEnabled = !lightingEnabled;
         if (lightingEnabled) glEnable(GL_LIGHTING);
         else                glDisable(GL_LIGHTING);
+        break;
+
+    case 'h':  // H = toggle shading
+        shadingEnabled = !shadingEnabled;
+        if (shadingEnabled)
+            glShadeModel(GL_SMOOTH);
+        else
+            glShadeModel(GL_FLAT);
         break;
 
     // WSAD camera pan
