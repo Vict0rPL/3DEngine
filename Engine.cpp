@@ -30,7 +30,32 @@ void Engine::Init() {
     if (fullscreen) glutFullScreen();
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(clearColor.r, clearColor.g, clearColor.b, 1.0f);
+    glShadeModel(GL_SMOOTH);
+
+    // --- new lighting setup ---
+    lightingEnabled = true;
+    glEnable(GL_LIGHTING);    // enable overall lighting :contentReference[oaicite:0]{index=0}
+    glEnable(GL_LIGHT0);      // enable light #0 :contentReference[oaicite:1]{index=1}
+
+    // tell GL to let glColor() drive the material’s ambient+diffuse
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+    // normalize normals & smooth shading
+    glEnable(GL_NORMALIZE);     // normalize normals after modelview transforms :contentReference[oaicite:2]{index=2}
+    glShadeModel(GL_SMOOTH);
+
+    // set up light-0’s ambient, diffuse, specular and position
+    GLfloat ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+    GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat position[] = { 10.0f, 10.0f, 10.0f, 1.0f };
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+    // ----------------------------------
 
     // Create scene: a cube
     objects.push_back(new Cube());
@@ -120,6 +145,12 @@ void Engine::Keyboard(unsigned char key, int, int) {
     case 'o': // Orthographic mode
         SetOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, zNear, zFar);
         Reshape(width, height);
+        break;
+
+    case 'l':  // toggle lighting
+        lightingEnabled = !lightingEnabled;
+        if (lightingEnabled) glEnable(GL_LIGHTING);
+        else                glDisable(GL_LIGHTING);
         break;
 
     // WSAD camera pan

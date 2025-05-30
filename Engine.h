@@ -35,6 +35,9 @@ private:
     int window;
     bool fullscreen;
     glm::vec3 clearColor;
+    
+    // Light
+    bool lightingEnabled;
 
     // Projection
     ProjectionMode projMode;
