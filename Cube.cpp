@@ -1,15 +1,15 @@
-﻿// Cube.cpp
-#include "Cube.h"
+﻿#include "Cube.h"
 #include <GL/freeglut.h>
 #include <glm/gtc/type_ptr.hpp>
 
 void Cube::Draw() {
-    // Pobierz i załaduj macierz modelu
+    //Load model matrix
     glm::mat4 model = GetModelMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrixf(glm::value_ptr(model));
 
+    //Draw filled faces
     struct V { float x, y, z; };
     static V verts[8] = {
         {-0.5f,-0.5f,-0.5f},{ 0.5f,-0.5f,-0.5f},{ 0.5f, 0.5f,-0.5f},{-0.5f, 0.5f,-0.5f},
@@ -26,7 +26,6 @@ void Cube::Draw() {
         {-1, 0, 0}, { 1, 0, 0}
     };
 
-    //Ustaw kolor ścian i narysuj wypełnione ściany
     glColor3f(0.2f, 0.6f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBegin(GL_QUADS);
@@ -39,8 +38,15 @@ void Cube::Draw() {
     }
     glEnd();
 
-    //Narysuj krawędzie na czarno
-    glColor3f(0.0f, 0.0f, 0.0f);
+    //Wireframe pass: thick orange if selected, else thin black
+    if (IsSelected()) {
+        glLineWidth(3.0f);                // thicker lines
+        glColor3f(1.0f, 0.5f, 0.0f);     // bright orange
+    }
+    else {
+        glLineWidth(1.0f);
+        glColor3f(0.0f, 0.0f, 0.0f);     // black
+    }
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glBegin(GL_QUADS);
     for (int i = 0; i < 6; ++i) {
@@ -51,8 +57,8 @@ void Cube::Draw() {
     }
     glEnd();
 
-    //Przywróć domyślny tryb rysowania i macierz
+    //Restore defaults
+    glLineWidth(1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glPopMatrix();
 }
-

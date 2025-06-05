@@ -3,44 +3,41 @@
 #include <glm/gtc/type_ptr.hpp>
 
 void Pyramid::Draw() {
-    // Załaduj macierz modelu
+    //Load model matrix
     glm::mat4 model = GetModelMatrix();
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrixf(glm::value_ptr(model));
 
-    // Fill pass: kolor piramidy
+    //Filled‐face pass
     glColor3f(1.0f, 0.8f, 0.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-    // Ściany (trójkąty)
+    //Triangular sides
     glBegin(GL_TRIANGLES);
-    // Przód
+    // Front
     glNormal3f(0.0f, 0.4472f, 0.8944f);
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glVertex3f(0.5f, -0.5f, 0.5f);
-
-    // Prawo
+    // Right
     glNormal3f(0.8944f, 0.4472f, 0.0f);
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(0.5f, -0.5f, 0.5f);
     glVertex3f(0.5f, -0.5f, -0.5f);
-
-    // Tył
+    // Back
     glNormal3f(0.0f, 0.4472f, -0.8944f);
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(0.5f, -0.5f, -0.5f);
     glVertex3f(-0.5f, -0.5f, -0.5f);
-
-    // Lewo
+    // Left
     glNormal3f(-0.8944f, 0.4472f, 0.0f);
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(-0.5f, -0.5f, -0.5f);
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glEnd();
 
-    // Podstawa (kwadrat)
+    // Base
     glBegin(GL_QUADS);
     glNormal3f(0.0f, -1.0f, 0.0f);
     glVertex3f(-0.5f, -0.5f, 0.5f);
@@ -49,31 +46,38 @@ void Pyramid::Draw() {
     glVertex3f(-0.5f, -0.5f, -0.5f);
     glEnd();
 
-    // Wireframe pass: czarne krawędzie
-    glColor3f(0.0f, 0.0f, 0.0f);
+    //Wireframe pass: thick orange if selected, else thin black
+    if (IsSelected()) {
+        glLineWidth(3.0f);
+        glColor3f(1.0f, 0.5f, 0.0f);
+    }
+    else {
+        glLineWidth(1.0f);
+        glColor3f(0.0f, 0.0f, 0.0f);
+    }
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    // Krawędzie ścian
+    // Edges of all faces (triangles)
     glBegin(GL_TRIANGLES);
-    // Przód
+    // Front
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glVertex3f(0.5f, -0.5f, 0.5f);
-    // Prawo
+    // Right
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(0.5f, -0.5f, 0.5f);
     glVertex3f(0.5f, -0.5f, -0.5f);
-    // Tył
+    // Back
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(0.5f, -0.5f, -0.5f);
     glVertex3f(-0.5f, -0.5f, -0.5f);
-    // Lewo
+    // Left
     glVertex3f(0.0f, 0.5f, 0.0f);
     glVertex3f(-0.5f, -0.5f, -0.5f);
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glEnd();
 
-    // Krawędzie podstawy
+    // Edges of the base
     glBegin(GL_QUADS);
     glVertex3f(-0.5f, -0.5f, 0.5f);
     glVertex3f(0.5f, -0.5f, 0.5f);
@@ -81,7 +85,8 @@ void Pyramid::Draw() {
     glVertex3f(-0.5f, -0.5f, -0.5f);
     glEnd();
 
-    // Przywróć tryb wypełnienia i macierz
+    //Restore defaults
+    glLineWidth(1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glPopMatrix();
 }

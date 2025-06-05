@@ -1,60 +1,52 @@
-// Engine.h
-#pragma once
-#include <glm/glm.hpp>
+﻿#pragma once
+
 #include <vector>
-#include "Object3D.h"
+#include <glm/glm.hpp>
+
+class Object3D;
 
 class Engine {
 public:
-    enum class ProjectionMode { Perspective, Ortho };
+    static Engine* instance;
 
+    // Constructor / destructor
     Engine(int argc, char** argv);
     ~Engine();
+
+    // Initialize GLUT, OpenGL state, and create the first object
     void Init();
+
+    // Enter the GLUT main loop
     void Run();
+
+    // Clean up (delete window, etc.)
     void Cleanup();
 
-    // Window and graphics mode
+    // Configuration setters
     void SetResolution(int w, int h);
     void SetFullscreen(bool value);
-
-    // Clear color
     void SetClearColor(float r, float g, float b);
-
-    // Animation speed
     void SetFPS(int frames);
 
-    // Projection settings
+    // Projection mode setters
     void SetPerspective(float fovDeg, float zn, float zf);
     void SetOrtho(float left, float right, float bottom, float top, float zn, float zf);
 
-    static Engine* instance;
+    // GLUT callback hooks (static)
+    static void DisplayCallback();
+    static void ReshapeCallback(int w, int h);
+    static void KeyboardCallback(unsigned char k, int x, int y);
+    static void SpecialCallback(int key, int x, int y);
+    static void MouseCallback(int button, int state, int x, int y);
+    static void MotionCallback(int x, int y);
+    static void TimerCallback(int value);
 
 private:
-    int width, height, fps;
-    int window;
-    bool fullscreen;
-    glm::vec3 clearColor;
-    
-    // Light
-    bool lightingEnabled;
-    // shading
-    bool shadingEnabled;
-    // Projection
-    ProjectionMode projMode;
-    float fov, zNear, zFar;
-    float orthoLeft, orthoRight, orthoBottom, orthoTop;
+    // Disallow copying
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
 
-    // Camera control
-    float angleY, angleX, camDist;
-    glm::vec3 camTarget;
-    int lastMouseX, lastMouseY;
-    bool rotating;
-
-    // Scene objects
-    std::vector<Object3D*> objects;
-
-    // Core loop and callbacks
+    // Internal handlers for each callback
     void Display();
     void Reshape(int w, int h);
     void Keyboard(unsigned char key, int x, int y);
@@ -62,12 +54,40 @@ private:
     void Mouse(int button, int state, int x, int y);
     void Motion(int x, int y);
 
-    static void DisplayCallback();
-    static void ReshapeCallback(int w, int h);
-    static void KeyboardCallback(unsigned char key, int x, int y);
-    static void SpecialCallback(int key, int x, int y);
-    static void MouseCallback(int button, int state, int x, int y);
-    static void MotionCallback(int x, int y);
-    static void TimerCallback(int value);
+    // timer handler
+    void OnTimer(int value);
 
+    // Window / context state
+    int width, height;
+    bool fullscreen;
+    int window;       // GLUT window handle
+
+    // Timing
+    int fps;
+
+    // Clear color
+    glm::vec3 clearColor;
+
+    // Projection parameters
+    enum class ProjectionMode { Perspective, Ortho };
+    ProjectionMode projMode;
+    float fov, zNear, zFar;
+    float orthoLeft, orthoRight, orthoBottom, orthoTop;
+
+    // Camera controls
+    float angleY, angleX;      // rotation around Y and X axes
+    float camDist;             // distance from camera to camTarget
+    glm::vec3 camTarget;       // point the camera looks at
+    int lastMouseX, lastMouseY;
+    bool rotating;
+
+    // Lighting / shading toggles
+    bool lightingEnabled;
+    bool shadingEnabled;
+
+    // Scene graph: a list of Object3D pointers
+    std::vector<Object3D*> objects;
+
+    // Index of the currently selected object in `objects` (−1 if none)
+    int selectedIndex;
 };
