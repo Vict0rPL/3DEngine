@@ -219,6 +219,7 @@ void Engine::Reshape(int w, int h) {
 //   Keyboard callback
 void Engine::Keyboard(unsigned char key, int, int) {
     const float moveStep = 0.1f;
+    const float rotStep = 0.1f;    // ~0.1 rad ≈ 5.7°
 
     switch (key) {
     case 27: // ESC
@@ -290,6 +291,62 @@ void Engine::Keyboard(unsigned char key, int, int) {
             glm::vec3 scl = selObj->GetScale();
             scl *= 0.9f;  // decrease each component by 10%
             selObj->SetScale(scl);
+        }
+        break;
+    }
+
+     //Rotate selected object along X, Y, Z with z/x, c/v, f/g
+    case 'z': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 rot = selObj->GetRotation();
+            rot.x += rotStep;       // rotate +0.1 rad about X
+            selObj->SetRotation(rot);
+        }
+        break;
+    }
+    case 'x': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 rot = selObj->GetRotation();
+            rot.x -= rotStep;       // rotate –0.1 rad about X
+            selObj->SetRotation(rot);
+        }
+        break;
+    }
+    case 'c': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 rot = selObj->GetRotation();
+            rot.y += rotStep;       // rotate +0.1 rad about Y
+            selObj->SetRotation(rot);
+        }
+        break;
+    }
+    case 'v': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 rot = selObj->GetRotation();
+            rot.y -= rotStep;       // rotate –0.1 rad about Y
+            selObj->SetRotation(rot);
+        }
+        break;
+    }
+    case 'f': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 rot = selObj->GetRotation();
+            rot.z += rotStep;       // rotate +0.1 rad about Z
+            selObj->SetRotation(rot);
+        }
+        break;
+    }
+    case 'g': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 rot = selObj->GetRotation();
+            rot.z -= rotStep;       // rotate –0.1 rad about Z
+            selObj->SetRotation(rot);
         }
         break;
     }
