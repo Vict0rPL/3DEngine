@@ -29,6 +29,8 @@ public:
         return T * Rz * Ry * Rx * S;
     }
 
+    glm::vec3 GetPosition() const { return position; }
+
     virtual void Draw() = 0;
 
     // selection API 

@@ -296,21 +296,70 @@ void Engine::Keyboard(unsigned char key, int, int) {
         selectedIndex = (int)objects.size() - 1;
         break;
     }
+    case '9': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 pos = selObj->GetPosition();
+            pos.z -= moveStep;      // move down (- Z)
+            selObj->SetPosition(pos);
+        }
+        break;
+    }
+    case '0': {
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 pos = selObj->GetPosition();
+            pos.z += moveStep;      // move up (+ Z)
+            selObj->SetPosition(pos);
+        }
+        break;
+    }
 
     default:
         break;
     }
-
+    
     // Request redisplay
     glutPostRedisplay();
 }
 
 
-//   Special keys callback (e.g. arrow keys). Not used right now.
-void Engine::Special(int key, int, int) {
-    // Placeholder for future object‐manipulation via arrow keys, etc.
+void Engine::Special(int key, int /*x*/, int /*y*/) {
+    // How much we move per key‐press
+    const float moveStep = 0.1f;
+
+    // If no object is selected, do nothing
+    if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+        // Get pointer to currently selected Object3D
+        Object3D* selObj = objects[selectedIndex];
+        // Read its current position
+        glm::vec3 pos = selObj->GetPosition();
+
+        switch (key) {
+        case GLUT_KEY_LEFT:
+            pos.x -= moveStep;
+            break;
+        case GLUT_KEY_RIGHT:
+            pos.x += moveStep;
+            break;
+        case GLUT_KEY_UP:
+            pos.y += moveStep;
+            break;
+        case GLUT_KEY_DOWN:
+            pos.y -= moveStep;
+            break;
+        default:
+            break;
+        }
+
+        // Set the new position back on the object
+        selObj->SetPosition(pos);
+    }
+
+    // redisplay after handling special keys
     glutPostRedisplay();
 }
+
 
 
 //   Mouse button callback (for rotating & zooming)
