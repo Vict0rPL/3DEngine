@@ -30,6 +30,7 @@ public:
     }
 
     glm::vec3 GetPosition() const { return position; }
+    glm::vec3 GetScale() const { return scale; }
 
     virtual void Draw() = 0;
 

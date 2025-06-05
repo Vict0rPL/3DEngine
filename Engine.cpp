@@ -275,6 +275,25 @@ void Engine::Keyboard(unsigned char key, int, int) {
         camTarget.z -= moveStep;
         break;
 
+    case 'm': { // scale up by 10%
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 scl = selObj->GetScale();
+            scl *= 1.1f;  // increase each component by 10%
+            selObj->SetScale(scl);
+        }
+        break;
+    }
+    case 'n': { // scale down by 10%
+        if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+            Object3D* selObj = objects[selectedIndex];
+            glm::vec3 scl = selObj->GetScale();
+            scl *= 0.9f;  // decrease each component by 10%
+            selObj->SetScale(scl);
+        }
+        break;
+    }
+
     case '1': { // Add a new Cube at camTarget
         Cube* newCube = new Cube();
         newCube->SetPosition(camTarget);
