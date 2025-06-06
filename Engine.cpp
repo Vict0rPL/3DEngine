@@ -37,7 +37,8 @@ Engine::Engine(int argc, char** argv)
     rotating(false),
     lightingEnabled(true),
     shadingEnabled(true),
-    selectedIndex(-1)
+    selectedIndex(-1),
+    showHelp(false)
 {
     // Initialize GLUT
     glutInit(&argc, argv);
@@ -120,6 +121,10 @@ void Engine::Init() {
     textures.push_back(new Texture2D("sky.png"));
     textures.push_back(new Texture2D("planet.png"));
     textures.push_back(new Texture2D("holo.png"));
+    textures.push_back(new Texture2D("hoth.png"));
+    textures.push_back(new Texture2D("moon.png"));
+    textures.push_back(new Texture2D("holo.png"));
+    textures.push_back(new Texture2D("deathstar.png"));
 
     //Create the initial scene object and select the first
     objects.push_back(new Cube());
@@ -213,6 +218,10 @@ void Engine::Display() {
     // Draw all objects
     for (auto obj : objects) {
         obj->Draw();
+    }
+
+    if (showHelp) {
+        DrawHelpOverlay();
     }
 
     // Swap buffers
@@ -432,7 +441,10 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
-
+    case 'H':
+    case 'h':
+        showHelp = !showHelp;
+        break;
     case '1': { // Add a new Cube at camTarget
         Cube* newCube = new Cube();
         newCube->SetPosition(camTarget);
@@ -547,6 +559,76 @@ void Engine::Motion(int x, int y) {
         glutPostRedisplay();
     }
 }
+
+// Rysuje tekst w trybie ortograficznym jako nakładkę na widok 3D
+void Engine::DrawHelpOverlay() {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+
+    // Wyłącz to, co przeszkadza w nakładce tekstowej
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+
+    // Ustaw rzutowanie ortograficzne w tym samym współczynniku, co okno
+    glMatrixMode(GL_PROJECTION);
+    glOrtho(0, width, 0, height, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    // Kolor tekstu i pozycja początkowa
+    glColor3f(1.0f, 1.0f, 1.0f);
+    const int lineHeight = 18;
+    int y = height - lineHeight; // zaczynamy od góry
+
+    // Tablica linii pomocy
+    const char* helpLines[] = {
+        "===== Help: Keyboard Commands =====",
+        "ESC           - Exit",
+        "TAB           - Cycle selected object",
+        "W/S/A/D/Q/E   - Pan camera target up/down/left/right/forward/back",
+        "Arrow Keys    - Move selected object in X/Y",
+        "9 / 0         - Move selected object along Z axis",
+        "Z / X         - Rotate selected object around X axis",
+        "C / V         - Rotate selected object around Y axis",
+        "F / G         - Rotate selected object around Z axis",
+        "M / N         - Scale selected object up/down",
+        "T             - Toggle texturing for selected object",
+        "R / Y         - Previous / Next texture",
+        "L             - Toggle lighting on/off",
+        "K             - Toggle shading on/off",
+        "P / O         - Perspective / Orthographic projection",
+        "1             - Add Cube",
+        "2             - Add Pyramid",
+        "3             - Add Sphere",
+        "Mouse Drag    - Rotate camera",
+        "Mouse Wheel   - Zoom in/out",
+        "H             - Toggle this help overlay",
+        "===================================="
+    };
+    const int linesCount = sizeof(helpLines) / sizeof(helpLines[0]);
+
+    // Narysuj kolejne linie przy użyciu GLUT bitmap font
+    for (int i = 0; i < linesCount; ++i) {
+        glRasterPos2i(10, y - i * lineHeight);
+        const char* line = helpLines[i];
+        while (*line) {
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *line++);
+        }
+    }
+
+    // Przywróć poprzedni stan
+    glPopAttrib();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+}
+
 
 
 //instance‐side timer handler

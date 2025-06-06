@@ -82,5 +82,14 @@
     <Image Include="planet.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="hoth.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="moon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="deathstar.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

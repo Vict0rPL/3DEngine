@@ -60,10 +60,13 @@ private:
     void Motion(int x, int y);
     void OnTimer(int value);
 
+    void DrawHelpOverlay();
+
     // Window / context state
     int width, height;
     bool fullscreen;
     int window;       // GLUT window handle
+    bool showHelp;
 
     // Timing
     int fps;
