@@ -1,8 +1,8 @@
-﻿#include "Engine.h"
+﻿#include <GL/glew.h>
+#include "Engine.h"
 #include "Cube.h"
 #include "Pyramid.h"
 #include "Sphere.h"
-
 #include <GL/freeglut.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -37,14 +37,21 @@ Engine::Engine(int argc, char** argv)
     shadingEnabled(true),
     selectedIndex(-1)
 {
-    // Initialize GLUT with command‐line arguments:
+    // Initialize GLUT
     glutInit(&argc, argv);
 
-    // Set the singleton instance pointer
+    //instance pointer
     instance = this;
 }
 
 Engine::~Engine() {
+	// Delete the cube texture
+    if (cubeTexture) {
+        cubeTexture->Delete();
+        delete cubeTexture;
+        cubeTexture = nullptr;
+    }
+
     // Delete all allocated scene objects
     for (auto obj : objects) {
         delete obj;
@@ -53,10 +60,17 @@ Engine::~Engine() {
 }
 
 void Engine::Init() {
-    // Set up display mode: double buffering, RGB, depth buffer
+    // Set up display mode. double buffering, RGB, depth buffer
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(width, height);
     window = glutCreateWindow("3D Engine");
+
+    GLenum glewErr = glewInit();
+    if (glewErr != GLEW_OK) {
+        std::cerr << "GLEW initialization failed: "
+            << glewGetErrorString(glewErr) << std::endl;
+        exit(1);
+    }
 
     if (fullscreen) {
         glutFullScreen();
@@ -76,6 +90,9 @@ void Engine::Init() {
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
+    // Enable 2D texturing in fixed‐function pipeline
+    glEnable(GL_TEXTURE_2D);
+
     // Normalize normals after modelview transforms
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
@@ -94,6 +111,12 @@ void Engine::Init() {
     // Create the initial scene object and select it
     objects.push_back(new Cube());
     selectedIndex = 0;  // first object is selected
+
+    // Load a texture for the cube
+    cubeTexture = new Texture2D("brick.png");
+    if (!cubeTexture->GetID()) {
+        std::cerr << "Warning: failed to load cube texture.\n";
+    }
 
     // Register GLUT callbacks
     glutDisplayFunc(DisplayCallback);

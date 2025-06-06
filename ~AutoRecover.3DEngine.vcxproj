@@ -135,13 +135,18 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object3D.cpp" />
-    <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="Pyramid.cpp" />
+    <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Object3D.h" />
-    <ClInclude Include="Triangle.h" />
+    <ClInclude Include="Pyramid.h" />
+    <ClInclude Include="Sphere.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Texture2D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

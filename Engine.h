@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <glm/glm.hpp>
+#include "Texture2D.h"
 
 class Object3D;
 
@@ -40,6 +41,8 @@ public:
     static void MouseCallback(int button, int state, int x, int y);
     static void MotionCallback(int x, int y);
     static void TimerCallback(int value);
+
+    Texture2D* cubeTexture = nullptr;
 
 private:
     // Disallow copying
