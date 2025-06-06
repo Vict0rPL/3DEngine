@@ -7,10 +7,13 @@
 class Object3D {
 public:
     Object3D()
-        : position(0.0f), rotation(0.0f), scale(1.0f),
-        selected(false) 
-    {
-    }
+        : position(0.0f),
+        rotation(0.0f),
+        scale(1.0f),
+        selected(false),
+        textured(false),
+        texIndex(0)
+    {}
 
     virtual ~Object3D() {}
 
@@ -39,10 +42,20 @@ public:
     void SetSelected(bool s) { selected = s; }
     bool IsSelected() const { return selected; }
 
+    // Texturing API
+    void SetTextured(bool on) { textured = on; }
+    bool IsTextured()    const { return textured; }
+
+    void SetTexIndex(int idx) { texIndex = idx; }
+    int  GetTexIndex()   const { return texIndex; }
+
 protected:
     glm::vec3 position;
     glm::vec3 rotation;
     glm::vec3 scale;
 
     bool selected;
+
+    bool textured;
+    int texIndex;   
 };

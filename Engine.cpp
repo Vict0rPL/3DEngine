@@ -1,9 +1,11 @@
-﻿#include <GL/glew.h>
+﻿// Engine.cpp
+#include <GL/glew.h>
+#include <GL/freeglut.h>
 #include "Engine.h"
 #include "Cube.h"
 #include "Pyramid.h"
 #include "Sphere.h"
-#include <GL/freeglut.h>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -45,12 +47,14 @@ Engine::Engine(int argc, char** argv)
 }
 
 Engine::~Engine() {
-	// Delete the cube texture
-    if (cubeTexture) {
-        cubeTexture->Delete();
-        delete cubeTexture;
-        cubeTexture = nullptr;
+    // Delete all loaded textures
+    for (auto tex : textures) {
+        if (tex) {
+            tex->Delete();
+            delete tex;
+        }
     }
+    textures.clear();
 
     // Delete all allocated scene objects
     for (auto obj : objects) {
@@ -108,15 +112,18 @@ void Engine::Init() {
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 
-    // Create the initial scene object and select it
-    objects.push_back(new Cube());
-    selectedIndex = 0;  // first object is selected
+    // Load all the textures we want to cycle through:
+    textures.push_back(new Texture2D("brick.png"));
+    textures.push_back(new Texture2D("wood.png"));
+    textures.push_back(new Texture2D("avocado.png"));
+    textures.push_back(new Texture2D("burgers.png"));
+    textures.push_back(new Texture2D("sky.png"));
+    textures.push_back(new Texture2D("planet.png"));
+    textures.push_back(new Texture2D("holo.png"));
 
-    // Load a texture for the cube
-    cubeTexture = new Texture2D("brick.png");
-    if (!cubeTexture->GetID()) {
-        std::cerr << "Warning: failed to load cube texture.\n";
-    }
+    //Create the initial scene object and select the first
+    objects.push_back(new Cube());
+    selectedIndex = 0;  // index 0 is the first object
 
     // Register GLUT callbacks
     glutDisplayFunc(DisplayCallback);
@@ -198,7 +205,7 @@ void Engine::Display() {
     );
     glLoadMatrixf(glm::value_ptr(view));
 
-    // Mark exactly one object as “selected”
+    // Mark exactly one object as selected
     for (int i = 0; i < (int)objects.size(); ++i) {
         objects[i]->SetSelected(i == selectedIndex);
     }
@@ -244,61 +251,72 @@ void Engine::Keyboard(unsigned char key, int, int) {
     const float moveStep = 0.1f;
     const float rotStep = 0.1f;    // ~0.1 rad ≈ 5.7°
 
+    // If no object is selected, we ignore T/R/Y
+    Object3D* selObj = nullptr;
+    if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
+        selObj = objects[selectedIndex];
+    }
+
     switch (key) {
     case 27: // ESC
         exit(0);
         break;
 
-    case '\t': // Tab: cycle selection
+    case '\t': // (Tab) cycle selection
         if (!objects.empty()) {
             selectedIndex = (selectedIndex + 1) % (int)objects.size();
             std::cout << "Selected object index = " << selectedIndex << "\n";
         }
         break;
-
+    case 'P':
     case 'p': // Switch to perspective
         SetPerspective(fov, zNear, zFar);
         Reshape(width, height);
         break;
-
+    case 'O':
     case 'o': // Switch to orthographic
         SetOrtho(orthoLeft, orthoRight, orthoBottom, orthoTop, zNear, zFar);
         Reshape(width, height);
         break;
-
+    case 'L':
     case 'l': // Toggle lighting
         lightingEnabled = !lightingEnabled;
         if (lightingEnabled) glEnable(GL_LIGHTING);
         else                glDisable(GL_LIGHTING);
         break;
-
-    case 'h': // Toggle shading model
+    case 'K':
+    case 'k': // Toggle shading model
         shadingEnabled = !shadingEnabled;
         if (shadingEnabled)
             glShadeModel(GL_SMOOTH);
         else
             glShadeModel(GL_FLAT);
         break;
-
+    case 'W':
     case 'w': // Pan camera up
         camTarget.y += moveStep;
         break;
+    case 'S':
     case 's': // Pan camera down
         camTarget.y -= moveStep;
         break;
+    case 'A':
     case 'a': // Pan camera left
         camTarget.x -= moveStep;
         break;
+    case 'D':
     case 'd': // Pan camera right
         camTarget.x += moveStep;
         break;
+    case 'Q':
     case 'q': // Move camera forward
         camTarget.z += moveStep;
         break;
+    case 'E':
     case 'e': // Move camera backward
         camTarget.z -= moveStep;
         break;
-
+    case 'M':
     case 'm': { // scale up by 10%
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
@@ -308,6 +326,7 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
+    case 'N':
     case 'n': { // scale down by 10%
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
@@ -317,8 +336,8 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
-
      //Rotate selected object along X, Y, Z with z/x, c/v, f/g
+    case 'Z':
     case 'z': {
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
@@ -328,6 +347,7 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
+    case 'X':
     case 'x': {
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
@@ -337,6 +357,7 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
+    case 'C':
     case 'c': {
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
@@ -346,6 +367,7 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
+    case 'V':
     case 'v': {
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
@@ -355,6 +377,7 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
+    case 'F':
     case 'f': {
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
@@ -364,12 +387,48 @@ void Engine::Keyboard(unsigned char key, int, int) {
         }
         break;
     }
+    case 'G':
     case 'g': {
         if (selectedIndex >= 0 && selectedIndex < (int)objects.size()) {
             Object3D* selObj = objects[selectedIndex];
             glm::vec3 rot = selObj->GetRotation();
             rot.z -= rotStep;       // rotate –0.1 rad about Z
             selObj->SetRotation(rot);
+        }
+        break;
+    }
+
+    // Toggle texturing on/off
+    case 'T':   // Toggle textured flag for selected object
+    case 't': {
+        if (selObj) {
+            bool current = selObj->IsTextured();
+            selObj->SetTextured(!current);
+            std::cout << "Object " << selectedIndex
+                << (selObj->IsTextured() ? ": Texturing ON\n"
+                    : ": Texturing OFF\n");
+        }
+        break;
+    }
+    case 'R':   // go to previous texture index
+    case 'r': {
+        if (selObj && !textures.empty()) {
+            int idx = selObj->GetTexIndex();
+            idx = (idx - 1 + (int)textures.size()) % (int)textures.size();
+            selObj->SetTexIndex(idx);
+            std::cout << "Object " << selectedIndex
+                << ": now using texture #" << idx << "\n";
+        }
+        break;
+    }
+    case 'Y':  // go to next texture index
+    case 'y': {
+        if (selObj && !textures.empty()) {
+            int idx = selObj->GetTexIndex();
+            idx = (idx + 1) % (int)textures.size();
+            selObj->SetTexIndex(idx);
+            std::cout << "Object " << selectedIndex
+                << ": now using texture #" << idx << "\n";
         }
         break;
     }
@@ -424,7 +483,7 @@ void Engine::Keyboard(unsigned char key, int, int) {
 
 
 void Engine::Special(int key, int /*x*/, int /*y*/) {
-    // How much we move per key‐press
+    // How much we move per keypress
     const float moveStep = 0.1f;
 
     // If no object is selected, do nothing

@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿// Engine.h
+#pragma once
 
 #include <vector>
 #include <glm/glm.hpp>
@@ -42,7 +43,8 @@ public:
     static void MotionCallback(int x, int y);
     static void TimerCallback(int value);
 
-    Texture2D* cubeTexture = nullptr;
+    // Collection of textures to load multiple at startup
+    std::vector<Texture2D*> textures;
 
 private:
     // Disallow copying
@@ -56,8 +58,6 @@ private:
     void Special(int key, int x, int y);
     void Mouse(int button, int state, int x, int y);
     void Motion(int x, int y);
-
-    // timer handler
     void OnTimer(int value);
 
     // Window / context state
@@ -91,6 +91,6 @@ private:
     // Scene graph: a list of Object3D pointers
     std::vector<Object3D*> objects;
 
-    // Index of the currently selected object in `objects` (−1 if none)
+    // Index of the currently selected object in objects (−1 if none)
     int selectedIndex;
 };
