@@ -1,4 +1,10 @@
-﻿// Engine.cpp
+﻿/**
+ * @file Engine.cpp
+ * @brief Implementacja klasy Engine odpowiedzialnej za inicjalizację, zarządzanie i renderowanie sceny 3D.
+ *
+ * Zawiera definicje metod do obsługi okna, ustawień kamery, obsługi tekstur, oświetlenia oraz interakcji użytkownika.
+ */
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "Engine.h"
@@ -10,9 +16,18 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-// Initialize the static instance pointer to nullptr
+ /**
+  * @brief Statyczny wskaźnik singletona klasy Engine.
+  */
 Engine* Engine::instance = nullptr;
 
+/**
+ * @brief Konstruktor klasy Engine.
+ * @param argc Liczba argumentów przekazanych do programu.
+ * @param argv Tablica argumentów przekazanych do programu.
+ *
+ * Inicjalizuje parametry silnika oraz ustawia wskaźnik singletona.
+ */
 Engine::Engine(int argc, char** argv)
     : width(800),
     height(600),
@@ -40,15 +55,20 @@ Engine::Engine(int argc, char** argv)
     selectedIndex(-1),
     showHelp(false)
 {
-    // Initialize GLUT
+    // Inicjalizacja GLUT
     glutInit(&argc, argv);
 
-    //instance pointer
+    // Ustaw wskaźnik singletona
     instance = this;
 }
 
+/**
+ * @brief Destruktor klasy Engine.
+ *
+ * Usuwa wszystkie załadowane tekstury oraz obiekty sceny.
+ */
 Engine::~Engine() {
-    // Delete all loaded textures
+    // Usuwanie tekstur
     for (auto tex : textures) {
         if (tex) {
             tex->Delete();
@@ -57,15 +77,19 @@ Engine::~Engine() {
     }
     textures.clear();
 
-    // Delete all allocated scene objects
+    // Usuwanie obiektów sceny
     for (auto obj : objects) {
         delete obj;
     }
     objects.clear();
 }
 
+/**
+ * @brief Inicjalizuje silnik, tworzy okno i ustawia OpenGL.
+ *
+ * Tworzy okno GLUT, ustawia tryb wyświetlania, konfiguruje oświetlenie, ładuje tekstury oraz rejestruje callbacki GLUT.
+ */
 void Engine::Init() {
-    // Set up display mode. double buffering, RGB, depth buffer
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(width, height);
     window = glutCreateWindow("3D Engine");
@@ -81,28 +105,17 @@ void Engine::Init() {
         glutFullScreen();
     }
 
-    // Enable depth testing
     glEnable(GL_DEPTH_TEST);
-
-    // Set initial shade model
     glShadeModel(GL_SMOOTH);
 
-    // Lighting setup
-    glEnable(GL_LIGHTING);     // global lighting enable
-    glEnable(GL_LIGHT0);       // use light
-
-    // Allow glColor to set ambient & diffuse material
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-    // Enable 2D texturing in fixed‐function pipeline
     glEnable(GL_TEXTURE_2D);
-
-    // Normalize normals after modelview transforms
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
 
-    // Configure light
     GLfloat ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
     GLfloat diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
     GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -113,7 +126,7 @@ void Engine::Init() {
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
 
-    // Load all the textures we want to cycle through:
+    // Ładowanie tekstur
     textures.push_back(new Texture2D("brick.png"));
     textures.push_back(new Texture2D("wood.png"));
     textures.push_back(new Texture2D("avocado.png"));
@@ -126,11 +139,11 @@ void Engine::Init() {
     textures.push_back(new Texture2D("holo.png"));
     textures.push_back(new Texture2D("deathstar.png"));
 
-    //Create the initial scene object and select the first
+    // Tworzenie obiektu startowego i ustawienie selekcji
     objects.push_back(new Cube());
-    selectedIndex = 0;  // index 0 is the first object
+    selectedIndex = 0;
 
-    // Register GLUT callbacks
+    // Rejestracja callbacków GLUT
     glutDisplayFunc(DisplayCallback);
     glutReshapeFunc(ReshapeCallback);
     glutKeyboardFunc(KeyboardCallback);
@@ -140,11 +153,16 @@ void Engine::Init() {
     glutTimerFunc(0, TimerCallback, 0);
 }
 
+/**
+ * @brief Uruchamia główną pętlę zdarzeń GLUT.
+ */
 void Engine::Run() {
-    // Enter the GLUT event loop
     glutMainLoop();
 }
 
+/**
+ * @brief Czyści zasoby i niszczy okno.
+ */
 void Engine::Cleanup() {
     std::cout << "Cleaning up...\n";
     if (window != 0) {
@@ -153,27 +171,52 @@ void Engine::Cleanup() {
     }
 }
 
-//   Configuration setters
+/**
+ * @brief Ustawia rozdzielczość okna.
+ * @param w Szerokość okna w pikselach.
+ * @param h Wysokość okna w pikselach.
+ */
 void Engine::SetResolution(int w, int h) {
     width = w;
     height = h;
 }
 
+/**
+ * @brief Ustawia tryb pełnoekranowy.
+ * @param value true - włącz pełny ekran, false - tryb okna.
+ */
 void Engine::SetFullscreen(bool value) {
     fullscreen = value;
 }
 
+/**
+ * @brief Ustawia kolor czyszczenia bufora kolorów.
+ * @param r Składowa czerwona (0.0 - 1.0).
+ * @param g Składowa zielona (0.0 - 1.0).
+ * @param b Składowa niebieska (0.0 - 1.0).
+ */
 void Engine::SetClearColor(float r, float g, float b) {
     clearColor = glm::vec3(r, g, b);
     glClearColor(r, g, b, 1.0f);
 }
 
+/**
+ * @brief Ustawia liczbę klatek na sekundę.
+ * @param frames Liczba klatek na sekundę.
+ */
 void Engine::SetFPS(int frames) {
     fps = frames;
 }
 
 
-//   Projection setters
+/**
+ * @brief Ustawia projekcję perspektywiczną.
+ * @param fovDeg Kąt widzenia (field of view) w stopniach.
+ * @param zn Odległość najbliższej płaszczyzny przycinania (near plane).
+ * @param zf Odległość najdalszej płaszczyzny przycinania (far plane).
+ *
+ * Ustawia tryb projekcji na perspektywiczną oraz zapisuje parametry projekcji.
+ */
 void Engine::SetPerspective(float fovDeg, float zn, float zf) {
     projMode = ProjectionMode::Perspective;
     fov = fovDeg;
@@ -181,6 +224,17 @@ void Engine::SetPerspective(float fovDeg, float zn, float zf) {
     zFar = zf;
 }
 
+/**
+ * @brief Ustawia projekcję ortograficzną.
+ * @param left Lewa granica widoku.
+ * @param right Prawa granica widoku.
+ * @param bottom Dolna granica widoku.
+ * @param top Górna granica widoku.
+ * @param zn Odległość najbliższej płaszczyzny przycinania (near plane).
+ * @param zf Odległość najdalszej płaszczyzny przycinania (far plane).
+ *
+ * Ustawia tryb projekcji na ortograficzną oraz zapisuje parametry projekcji.
+ */
 void Engine::SetOrtho(float left, float right, float bottom, float top, float zn, float zf) {
     projMode = ProjectionMode::Ortho;
     orthoLeft = left;
@@ -191,7 +245,13 @@ void Engine::SetOrtho(float left, float right, float bottom, float top, float zn
     zFar = zf;
 }
 
-//   Display callback
+/**
+ * @brief Funkcja wywoływana podczas renderowania sceny.
+ *
+ * Czyści bufor kolorów i głębokości, ustawia macierz widoku (kamery), rysuje wszystkie obiekty
+ * na scenie oraz wyświetla pomoc, jeśli jest włączona.
+ * Na koniec zamienia bufor wyświetlania.
+ */
 void Engine::Display() {
     // Clear color & depth buffers
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -228,8 +288,13 @@ void Engine::Display() {
     glutSwapBuffers();
 }
 
-
-//   Reshape callback
+/**
+ * @brief Funkcja wywoływana przy zmianie rozmiaru okna.
+ * @param w Nowa szerokość okna.
+ * @param h Nowa wysokość okna.
+ *
+ * Aktualizuje viewport i macierz projekcji zgodnie z aktualnym trybem projekcji (perspektywa lub orto).
+ */
 void Engine::Reshape(int w, int h) {
     width = w;
     height = h;
@@ -255,7 +320,28 @@ void Engine::Reshape(int w, int h) {
 }
 
 
-//   Keyboard callback
+
+/**
+ * @brief Obsługa zdarzeń klawiatury (klawisze ASCII).
+ * @param key Wciśnięty klawisz.
+ * @param x Pozycja kursora myszy w chwili wciśnięcia (nieużywane).
+ * @param y Pozycja kursora myszy w chwili wciśnięcia (nieużywane).
+ *
+ * Funkcja reaguje na wciśnięcia klawiszy sterujących:
+ * - ESC - wyjście z programu,
+ * - Tab - zmiana wybranego obiektu,
+ * - P/O - zmiana trybu projekcji (perspektywa/ortho),
+ * - L/K - włączanie/wyłączanie oświetlenia i modelu cieniowania,
+ * - WASDQE - przesuwanie kamery,
+ * - M/N - skalowanie wybranego obiektu,
+ * - Z/X, C/V, F/G - obrót wybranego obiektu wokół osi X, Y, Z,
+ * - T/R/Y - włączanie/wyłączanie tekstur, zmiana tekstury,
+ * - H - pokaz/ukryj pomoc,
+ * - 1/2/3 - dodanie nowego obiektu (kostka, piramida, kula),
+ * - 9/0 - przesunięcie wybranego obiektu wzdłuż osi Z.
+ *
+ * Po przetworzeniu zdarzenia następuje wywołanie funkcji ponownego renderowania.
+ */
 void Engine::Keyboard(unsigned char key, int, int) {
     const float moveStep = 0.1f;
     const float rotStep = 0.1f;    // ~0.1 rad ≈ 5.7°
@@ -493,7 +579,18 @@ void Engine::Keyboard(unsigned char key, int, int) {
     glutPostRedisplay();
 }
 
-
+/**
+ * @brief Obsługa klawiszy specjalnych (strzałki itp.).
+ * @param key Kod wciśniętego klawisza specjalnego (GLUT_KEY_*).
+ * @param x Pozycja kursora myszy w chwili wciśnięcia (nieużywane).
+ * @param y Pozycja kursora myszy w chwili wciśnięcia (nieużywane).
+ *
+ * Funkcja przesuwa wybrany obiekt w płaszczyźnie XY w zależności od strzałek:
+ * - Strzałka w lewo/prawo przesuwa wzdłuż osi X,
+ * - Strzałka w górę/dół przesuwa wzdłuż osi Y.
+ *
+ * Po przetworzeniu zdarzenia następuje wywołanie funkcji ponownego renderowania.
+ */
 void Engine::Special(int key, int /*x*/, int /*y*/) {
     // How much we move per keypress
     const float moveStep = 0.1f;
@@ -532,7 +629,17 @@ void Engine::Special(int key, int /*x*/, int /*y*/) {
 
 
 
-//   Mouse button callback (for rotating & zooming)
+/**
+ * @brief Obsługa zdarzeń myszy - kliknięcia i przewijania.
+ * @param button Naciśnięty przycisk myszy lub scroll (GLUT_LEFT_BUTTON, 3 = scroll up, 4 = scroll down).
+ * @param state Stan przycisku (GLUT_DOWN lub GLUT_UP).
+ * @param x Pozycja kursora myszy w osi X.
+ * @param y Pozycja kursora myszy w osi Y.
+ *
+ * Funkcja odpowiada za rozpoczęcie i zakończenie obracania kamery (kliknięcie lewego przycisku myszy)
+ * oraz za zoomowanie kamery przy użyciu scrolla.
+ * Po każdej zmianie wywołuje ponowne przerysowanie sceny.
+ */
 void Engine::Mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON) {
         rotating = (state == GLUT_DOWN);
@@ -549,7 +656,15 @@ void Engine::Mouse(int button, int state, int x, int y) {
 }
 
 
-//   Mouse motion callback (dragging to rotate camera)
+/**
+ * @brief Obsługa ruchu myszy (przeciąganie) podczas obracania kamery.
+ * @param x Aktualna pozycja kursora myszy w osi X.
+ * @param y Aktualna pozycja kursora myszy w osi Y.
+ *
+ * Jeśli kamera jest w trybie obracania (rotating == true),
+ * to funkcja aktualizuje kąty obrotu kamery na podstawie ruchu myszy
+ * i prosi o przerysowanie sceny.
+ */
 void Engine::Motion(int x, int y) {
     if (rotating) {
         angleY += (x - lastMouseX) * 0.005f;
@@ -560,7 +675,14 @@ void Engine::Motion(int x, int y) {
     }
 }
 
-// Rysuje tekst w trybie ortograficznym jako nakładkę na widok 3D
+/**
+ * @brief Rysuje nakładkę tekstową z pomocą (instrukcjami obsługi) w trybie ortograficznym.
+ *
+ * Funkcja ustawia odpowiednią macierz projekcji i modelu,
+ * wyłącza oświetlenie i test głębokości,
+ * a następnie renderuje linie tekstu z instrukcjami obsługi klawiatury i myszy.
+ * Po zakończeniu przywraca poprzedni stan OpenGL.
+ */
 void Engine::DrawHelpOverlay() {
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -631,7 +753,13 @@ void Engine::DrawHelpOverlay() {
 
 
 
-//instance‐side timer handler
+/**
+ * @brief Handler timera wywoływany po upływie czasu.
+ * @param value Wartość przekazywana do timera (nieużywana).
+ *
+ * Funkcja wywołuje ponowne przerysowanie sceny i ustawia kolejny wywołanie timera
+ * zgodnie z wartością fps (klatek na sekundę).
+ */
 void Engine::OnTimer(int value) {
     glutPostRedisplay();
     // Schedule the next timer callback
@@ -639,34 +767,82 @@ void Engine::OnTimer(int value) {
 }
 
 
-//   Static GLUT callback wrapper for timer
+/**
+ * @brief Statyczna funkcja callback timera GLUT.
+ * @param value Wartość przekazywana do timera.
+ *
+ * Funkcja przekazuje wywołanie do metody instancji klasy Engine.
+ */
 void Engine::TimerCallback(int value) {
     // Call the renamed instance method
     instance->OnTimer(value);
 }
 
 
-//   Static GLUT callback wrappers for the rest
+/**
+ * @brief Statyczna funkcja callback GLUT do wyświetlania sceny.
+ *
+ * Wywołuje metodę Display() instancji klasy Engine.
+ */
 void Engine::DisplayCallback() {
     instance->Display();
 }
 
+/**
+ * @brief Statyczna funkcja callback GLUT obsługująca zmianę rozmiaru okna.
+ * @param w Nowa szerokość okna.
+ * @param h Nowa wysokość okna.
+ *
+ * Przekazuje wywołanie do metody Reshape() instancji klasy Engine.
+ */
 void Engine::ReshapeCallback(int w, int h) {
     instance->Reshape(w, h);
 }
 
+/**
+ * @brief Statyczna funkcja callback GLUT obsługująca zdarzenia klawiatury.
+ * @param k Naciśnięty klawisz.
+ * @param x Pozycja kursora myszy w osi X (nieużywana).
+ * @param y Pozycja kursora myszy w osi Y (nieużywana).
+ *
+ * Przekazuje wywołanie do metody Keyboard() instancji klasy Engine.
+ */
 void Engine::KeyboardCallback(unsigned char k, int x, int y) {
     instance->Keyboard(k, x, y);
 }
 
+/**
+ * @brief Statyczna funkcja callback GLUT obsługująca klawisze specjalne.
+ * @param key Kod klawisza specjalnego (np. strzałki).
+ * @param x Pozycja kursora myszy w osi X (nieużywana).
+ * @param y Pozycja kursora myszy w osi Y (nieużywana).
+ *
+ * Przekazuje wywołanie do metody Special() instancji klasy Engine.
+ */
 void Engine::SpecialCallback(int key, int x, int y) {
     instance->Special(key, x, y);
 }
 
+/**
+ * @brief Statyczna funkcja callback GLUT obsługująca przyciski myszy.
+ * @param button Naciśnięty przycisk myszy.
+ * @param state Stan przycisku (GLUT_DOWN lub GLUT_UP).
+ * @param x Pozycja kursora myszy w osi X.
+ * @param y Pozycja kursora myszy w osi Y.
+ *
+ * Przekazuje wywołanie do metody Mouse() instancji klasy Engine.
+ */
 void Engine::MouseCallback(int button, int state, int x, int y) {
     instance->Mouse(button, state, x, y);
 }
 
+/**
+ * @brief Statyczna funkcja callback GLUT obsługująca ruch myszy.
+ * @param x Pozycja kursora myszy w osi X.
+ * @param y Pozycja kursora myszy w osi Y.
+ *
+ * Przekazuje wywołanie do metody Motion() instancji klasy Engine.
+ */
 void Engine::MotionCallback(int x, int y) {
     instance->Motion(x, y);
 }

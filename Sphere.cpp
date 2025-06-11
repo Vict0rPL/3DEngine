@@ -1,10 +1,26 @@
-﻿// Sphere.cpp
+﻿/**
+ * @file Sphere.cpp
+ * @brief Implementacja rysowania obiektu typu Sphere (sfera 3D).
+ */
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <glm/gtc/type_ptr.hpp>
 #include "Sphere.h"
 #include "Engine.h"
 
+/**
+ * @brief Rysuje sferę 3D z teksturą lub bez.
+ *
+ * Funkcja renderuje sferę o promieniu 0.5, złożoną z 32 plaszczyzn wzdłuż "slices" i "stacks".
+ * Jeśli obiekt jest teksturowany i dostępne są tekstury w silniku, odpowiednia tekstura zostanie użyta.
+ * Rysowana jest zarówno wypełniona sfera (teksturą lub jednolitym kolorem), jak i nakładka drucianej siatki.
+ *
+ * Szczegóły implementacyjne:
+ * - Ustawia macierz modelu (transformację).
+ * - Wiąże odpowiednią teksturę lub odwiązuje tekstury, jeśli nie ma ich dostępnych.
+ * - Używa GLU quadric do wygenerowania sfery z automatycznie generowanymi współrzędnymi tekstury.
+ * - Rysuje overlay w trybie drucianym (wireframe), pomarańczowy jeśli zaznaczona, czarny w przeciwnym wypadku.
+ */
 void Sphere::Draw() {
     // Bind the correct texture (if any) for this object
     if (Engine::instance && !Engine::instance->textures.empty()) {

@@ -1,4 +1,7 @@
-﻿// Texture2D.cpp
+﻿/**
+ * @file Texture2D.cpp
+ * @brief Implementacja klasy Texture2D obsługującej tekstury 2D w OpenGL.
+ */
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include "Texture2D.h"
@@ -6,6 +9,15 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+ /**
+  * @brief Konstruktor klasy Texture2D.
+  *
+  * Ładuje teksturę z pliku o podanej ścieżce, generuje identyfikator OpenGL,
+  * przesyła dane do GPU i ustawia parametry tekstury (wrap, filtrowanie, mipmapy).
+  *
+  * @param filepath Ścieżka do pliku obrazu tekstury.
+  */
 
 Texture2D::Texture2D(const char* filepath)
 {
@@ -59,16 +71,31 @@ Texture2D::Texture2D(const char* filepath)
     stbi_image_free(data);
 }
 
+/**
+ * @brief Wiąże (binduje) teksturę do aktualnego kontekstu OpenGL.
+ *
+ * Po wywołaniu tej funkcji tekstura staje się aktywna i może być używana do renderowania.
+ */
 void Texture2D::Bind() const
 {
     glBindTexture(GL_TEXTURE_2D, id);
 }
 
+/**
+ * @brief Odwiązuje (unbinduje) dowiązaną teksturę 2D.
+ *
+ * Sprawia, że żadna tekstura 2D nie jest aktualnie aktywna.
+ */
 void Texture2D::Unbind()
 {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+/**
+ * @brief Usuwa teksturę z GPU i zeruje jej identyfikator.
+ *
+ * Powinno się wywołać przed usunięciem obiektu lub gdy tekstura nie jest już potrzebna.
+ */
 void Texture2D::Delete()
 {
     if (id != 0) {

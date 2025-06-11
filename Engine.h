@@ -1,4 +1,8 @@
-﻿// Engine.h
+﻿/**
+ * @file Engine.h
+ * @brief Główna klasa silnika 3D – zarządza cyklem życia aplikacji, renderowaniem i obsługą wejścia.
+ */
+
 #pragma once
 
 #include <vector>
@@ -7,34 +11,77 @@
 
 class Object3D;
 
+/**
+ * @class Engine
+ * @brief Klasa reprezentująca silnik 3D oparty na GLUT i OpenGL.
+ *
+ * Silnik zarządza inicjalizacją kontekstu graficznego, rysowaniem sceny, obsługą zdarzeń wejściowych
+ * oraz przechowywaniem obiektów 3D i tekstur. Umożliwia wybór trybu rzutowania (perspektywa lub ortho),
+ * zarządzanie kamerą i ustawieniami okna.
+ */
 class Engine {
 public:
+    /** @brief Wskaźnik do instancji singletonu silnika. */
     static Engine* instance;
 
-    // Constructor / destructor
+    /**
+     * @brief Konstruktor silnika.
+     * @param argc liczba argumentów wiersza poleceń (GLUT)
+     * @param argv tablica argumentów wiersza poleceń (GLUT)
+     */
     Engine(int argc, char** argv);
+
+    /**
+     * @brief Destruktor silnika – zwalnia zasoby.
+     */
     ~Engine();
 
-    // Initialize GLUT, OpenGL state, and create the first object
+    /**
+     * @brief Inicjalizacja GLUT, OpenGL i podstawowych ustawień sceny.
+     */
     void Init();
 
-    // Enter the GLUT main loop
+    /**
+     * @brief Rozpoczyna główną pętlę programu GLUT.
+     */
     void Run();
 
-    // Clean up (delete window, etc.)
+    /**
+     * @brief Czyści zasoby i zamyka aplikację.
+     */
     void Cleanup();
 
-    // Configuration setters
+    // ===== Konfiguracja okna =====
+
+    /** @brief Ustawia rozdzielczość okna. */
     void SetResolution(int w, int h);
+
+    /** @brief Przełącza tryb pełnoekranowy. */
     void SetFullscreen(bool value);
+
+    /** @brief Ustawia kolor czyszczenia (tło). */
     void SetClearColor(float r, float g, float b);
+
+    /** @brief Ustawia liczbę klatek na sekundę. */
     void SetFPS(int frames);
 
-    // Projection mode setters
+    // ===== Tryby projekcji =====
+
+    /**
+     * @brief Ustawia projekcję perspektywiczną.
+     * @param fovDeg kąt widzenia w stopniach
+     * @param zn bliska płaszczyzna obcinania
+     * @param zf daleka płaszczyzna obcinania
+     */
     void SetPerspective(float fovDeg, float zn, float zf);
+
+    /**
+     * @brief Ustawia projekcję ortogonalną.
+     */
     void SetOrtho(float left, float right, float bottom, float top, float zn, float zf);
 
-    // GLUT callback hooks (static)
+    // ===== Callbacki GLUT (statyczne) =====
+
     static void DisplayCallback();
     static void ReshapeCallback(int w, int h);
     static void KeyboardCallback(unsigned char k, int x, int y);
@@ -43,15 +90,15 @@ public:
     static void MotionCallback(int x, int y);
     static void TimerCallback(int value);
 
-    // Collection of textures to load multiple at startup
+    /** @brief Kolekcja tekstur ładowanych przy starcie. */
     std::vector<Texture2D*> textures;
 
 private:
-    // Disallow copying
+    // Kopiowanie niedozwolone
     Engine(const Engine&) = delete;
     Engine& operator=(const Engine&) = delete;
 
-    // Internal handlers for each callback
+    // Obsługa zdarzeń (wewnętrzne)
     void Display();
     void Reshape(int w, int h);
     void Keyboard(unsigned char key, int x, int y);
@@ -60,40 +107,40 @@ private:
     void Motion(int x, int y);
     void OnTimer(int value);
 
+    /** @brief Rysuje nakładkę pomocy na ekranie. */
     void DrawHelpOverlay();
 
-    // Window / context state
-    int width, height;
-    bool fullscreen;
-    int window;       // GLUT window handle
-    bool showHelp;
+    // ===== Stan okna i renderera =====
+    int width, height;       ///< Rozdzielczość okna
+    bool fullscreen;         ///< Czy w trybie pełnoekranowym
+    int window;              ///< Uchwyt okna GLUT
+    bool showHelp;           ///< Czy wyświetlić nakładkę pomocy
 
-    // Timing
-    int fps;
+    // ===== Synchronizacja klatek =====
+    int fps;                 ///< Liczba FPS
 
-    // Clear color
-    glm::vec3 clearColor;
+    // ===== Kolor tła =====
+    glm::vec3 clearColor;    ///< Kolor czyszczenia bufora
 
-    // Projection parameters
+    // ===== Tryby projekcji =====
     enum class ProjectionMode { Perspective, Ortho };
     ProjectionMode projMode;
     float fov, zNear, zFar;
     float orthoLeft, orthoRight, orthoBottom, orthoTop;
 
-    // Camera controls
-    float angleY, angleX;      // rotation around Y and X axes
-    float camDist;             // distance from camera to camTarget
-    glm::vec3 camTarget;       // point the camera looks at
-    int lastMouseX, lastMouseY;
-    bool rotating;
+    // ===== Sterowanie kamerą =====
+    float angleY, angleX;           ///< Obroty wokół osi Y i X
+    float camDist;                  ///< Odległość od celu kamery
+    glm::vec3 camTarget;            ///< Punkt, na który patrzy kamera
+    int lastMouseX, lastMouseY;     ///< Pozycja myszy
+    bool rotating;                  ///< Czy użytkownik obraca scenę
 
-    // Lighting / shading toggles
+    // ===== Ustawienia oświetlenia =====
     bool lightingEnabled;
     bool shadingEnabled;
 
-    // Scene graph: a list of Object3D pointers
-    std::vector<Object3D*> objects;
+    // ===== Scena 3D =====
+    std::vector<Object3D*> objects; ///< Lista obiektów w scenie
 
-    // Index of the currently selected object in objects (−1 if none)
-    int selectedIndex;
+    int selectedIndex; ///< Indeks aktualnie zaznaczonego obiektu (lub −1 jeśli brak)
 };
